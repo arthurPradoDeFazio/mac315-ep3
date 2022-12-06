@@ -136,8 +136,15 @@ function [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n)
   n_aux = n + m;
 endfunction
 
+function [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux)
+  x_aux = [zeros(1, n_aux - m_aux) b_aux']';
+  bind_aux = n_aux - m_aux + 1:n_aux;
+  Binv_aux = eye(m_aux);
+endfunction
+
 function [ind x d] = simplex(A, b, c, m, n)
   [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n);
+  [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
 endfunction
 
 % Example with optimal solution:
@@ -161,5 +168,6 @@ x = [10 0 3 0 0]';
 bind = [1 3];
 B = [ [1; 0] [0; 1] ];
 Binv = inv(B);
-auxiliary_problem(A, b, c, m, n);
+%[A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n);
+%initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
 %[ind v] = phaseII(A,b,c,m,n,x,bind, Binv);
