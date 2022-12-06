@@ -94,7 +94,7 @@ function x = update_basic_solution(x, bind, m, u, theta, j, l)
     Binv(l, :) = Binv(l, :) / (u(l));
  endfunction
 
-function [ind v ] = simplex(A,b,c,m,n,x,bind, Binv)
+function [ind v ] = phaseII(A,b,c,m,n,x,bind, Binv)
     iteration = 0;
 
     while(true)
@@ -128,6 +128,18 @@ function [ind v ] = simplex(A,b,c,m,n,x,bind, Binv)
     endwhile
 endfunction
 
+function [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n)
+  A_aux = [A eye(m)]
+  b_aux = b
+  c_aux = [zeros(1, n) ones(1, m)]'
+  m_aux = m
+  n_aux = n
+endfunction
+
+function [ind x d] = simplex(A, b, c, m, n)
+  [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n);
+endfunction
+
 % Example with optimal solution:
 % b = [20 20 20]';
 % c = [-10  -12 -12 0 0 0]';
@@ -149,5 +161,5 @@ x = [10 0 3 0 0]';
 bind = [1 3];
 B = [ [1; 0] [0; 1] ];
 Binv = inv(B);
-
-[ind v] = simplex(A,b,c,m,n,x,bind, Binv);
+auxiliary_problem(A, b, c, m, n);
+%[ind v] = phaseII(A,b,c,m,n,x,bind, Binv);
