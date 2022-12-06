@@ -129,11 +129,11 @@ function [ind v ] = phaseII(A,b,c,m,n,x,bind, Binv)
 endfunction
 
 function [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n)
-  A_aux = [A eye(m)]
-  b_aux = b
-  c_aux = [zeros(1, n) ones(1, m)]'
-  m_aux = m
-  n_aux = n
+  A_aux = [A eye(m)];
+  b_aux = b;
+  c_aux = [zeros(1, n) ones(1, m)]';
+  m_aux = m;
+  n_aux = n + m;
 endfunction
 
 function [ind x d] = simplex(A, b, c, m, n)
