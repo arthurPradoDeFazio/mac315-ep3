@@ -5,6 +5,32 @@
 % - 11796378 - João Henri Carrenho Rocha
 % ========================================
 
+% ========================================================================================================================
+% Phase One: 
+% ========================================================================================================================
+
+function [A b] = force_positive_b(A, b, m)
+	for i = 1:m
+		if b(i) < 0
+			b(i) = -b(i);
+			A(i, :) = -A(i, :);
+		endif
+	endfor
+endfunction
+
+function [A_aux b_aux c_aux m_aux n_aux] = introduce_artificial_variables(A, b, c, m, n)
+    A_aux = [A eye(m)];
+    b_aux = b;
+    c_aux = [zeros(1, n) ones(1, m)]';
+    m_aux = m;
+    n_aux = n + m;
+endfunction
+
+
+% ========================================================================================================================
+% Phase Two: 
+% ========================================================================================================================
+
 function print_iteration_info(c, bind, x, iteration)
     printf("Iterando %d\n", iteration);
     for idx = 1:numel(bind)
@@ -94,8 +120,22 @@ function x = update_basic_solution(x, bind, m, u, theta, j, l)
     Binv(l, :) = Binv(l, :) / (u(l));
  endfunction
 
-function [ind v ] = phaseII(A,b,c,m,n,x,bind, Binv)
+
+% ========================================================================================================================
+% Main function: 
+% ========================================================================================================================
+
+function phaseI(A, b, c, m, b):
+    printf("Fase 1\n\n");
+
+    [A b] = force_positive_b(A, b, m)
+
+    [A b c m n] = introduce_artificial_variables(A, b, c, m, n);
+endfunction
+
+function [ind v] = phaseII(A,b,c,m,n,x,bind, Binv)
     iteration = 0;
+    printf("Fase 2\n\n");
 
     while(true)
         print_iteration_info(c, bind, x, iteration)
@@ -128,19 +168,15 @@ function [ind v ] = phaseII(A,b,c,m,n,x,bind, Binv)
     endwhile
 endfunction
 
-function [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n)
-  A_aux = [A eye(m)];
-  b_aux = b;
-  c_aux = [zeros(1, n) ones(1, m)]';
-  m_aux = m;
-  n_aux = n + m;
-endfunction
-
 function [ind x d] = simplex(A, b, c, m, n)
   [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n);
 endfunction
 
-% Example with optimal solution:
+% ========================================================================================================================
+% Examples: 
+% ========================================================================================================================
+
+% Problem with optimal solution:
 % b = [20 20 20]';
 % c = [-10  -12 -12 0 0 0]';
 % A = [ [1; 2; 2] [2; 1; 2] [2; 2; 1] [1; 0; 0] [0; 1; 0] [0; 0; 1] ];
@@ -151,7 +187,7 @@ endfunction
 % B = [ [1; 0; 0] [0; 1; 0] [0; 0; 1]];
 % Binv = inv(B);
 
-% Example with unlimited cost:
+% Problem with unlimited cost:
 A = [ [1; 0] [2; 1] [0; 1] [1; 1] [0; 0] ];
 b = [10 3]';
 c = [4  5  1 -1 -1]';
@@ -161,5 +197,5 @@ x = [10 0 3 0 0]';
 bind = [1 3];
 B = [ [1; 0] [0; 1] ];
 Binv = inv(B);
-auxiliary_problem(A, b, c, m, n);
+introduce_artificial_variables(A, b, c, m, n);
 %[ind v] = phaseII(A,b,c,m,n,x,bind, Binv);
