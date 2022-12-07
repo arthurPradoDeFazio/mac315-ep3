@@ -284,11 +284,11 @@ endfunction
 % n = 6;
 
 % Problem with unlimited cost:
-A = [ [1; 0] [2; 1] [0; 1] [1; 1] [0; 0] ];
-b = [10 3]';
-c = [4  5  1 -1 -1]';
-m = 2;
-n = 5;
+% A = [ [1; 0] [2; 1] [0; 1] [1; 1] [0; 0] ];
+% b = [10 3]';
+% c = [4  5  1 -1 -1]';
+% m = 2;
+% n = 5;
 
 % Problem with optimal solution and redundant constraint
 A = [[1; -1; 0; 0] [2; 2; 4; 0] [3; 6; 9; 3] [0;0;0; 1]] % pagina 114 do livro
