@@ -37,38 +37,42 @@ function artificial = is_artificial(index, m_aux, n_aux)
 endfunction
 
 function [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux)
-  j = find(Binv_A(l) != 0)(1);
+  j = find(Binv_A(l, :) != 0)(1);
   u = Binv_A(:, j);
   Binv = update_Binv(Binv, m_aux, u, l);
   Binv_A = update_Binv(Binv_A, m_aux, u, l);
   bind(l) = j;
 endfunction
 
-function [A Binv Binv_A bind] = remove_redundant_constraint(l, A, Binv, bind)
+function [A b Binv Binv_A bind m_aux n_aux] = remove_redundant_constraint(l, A, Binv, bind, m_aux, n_aux)
   A(l, :) = [];
+  b(l) = [];
   Binv(l, :) = [];
   Binv(:, l) = [];
   bind(l) = [];
   Binv_A = Binv * A;
+  m_aux -= 1;
+  n_aux -= 1;
 endfunction
 
-function [] = drive_artificials_out(A, x, bind, Binv, m_aux, n_aux)
+function [A b bind Binv] = drive_artificials_out(A, b, bind, Binv, m_aux, n_aux)
   Binv_A = Binv * A;
   l = 1;
   while l <= m_aux
     if is_artificial(bind(l), m_aux, n_aux)
       if all(Binv_A(l, :) == 0)
-        [A Binv Binv_A bind] = remove_redundant_constraint(l, A, Binv, bind);
-        m_aux -= 1;
+        [A Binv Binv_A bind m_aux n_aux] = remove_redundant_constraint(l, A, b, Binv, bind, m_aux, n_aux);
       else
-        [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv);
+        [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux);
         l += 1;
       endif
+    else
+      l += 1;
     endif
   endwhile
 endfunction
 
-function [opt_cost v bind Binv] = phaseI(A, b, c, m, n)
+function [opt_cost v bind Binv A b] = phaseI(A, b, c, m, n)
     printf("Fase 1\n\n");
 
     [A b] = force_positive_b(A, b, m);
@@ -81,8 +85,8 @@ function [opt_cost v bind Binv] = phaseI(A, b, c, m, n)
       return
     endif
     
-    drive_artificials_out()
-    
+    [A b bind Binv] = drive_artificials_out(A, b, bind, Binv, m_aux, n_aux);
+    v(n + 1:end) = [];
 endfunction
 
 
@@ -230,14 +234,14 @@ endfunction
 
 
 function [ind x d] = simplex(A, b, c, m, n)
-  [opt_cost v bind Binv] = phaseI(A, b, c, m, n);
+  [opt_cost v bind Binv A] = phaseI(A, b, c, m, n);
   
   if opt_cost > 0
     [ind x d] = infeasible_problem(opt_cost);
     return
   endif
   
-  %phaseII
+  
 endfunction
 
 % ========================================================================================================================
