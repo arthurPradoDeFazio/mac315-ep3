@@ -82,8 +82,8 @@ function [theta, l] = calculate_theta(m, x, bind, u)
     endfor
 endfunction
 
-function [ind v] = optimal_solution(c, n, x, bind)
-    ind = 0;
+function [opt_cost v] = optimal_solution(c, n, x, bind)
+    opt_cost = c'*x;
     v = x;
 
     printf("\nSolução ótima encontrada com custo %f\n", c'*x);
@@ -92,8 +92,8 @@ function [ind v] = optimal_solution(c, n, x, bind)
     endfor
 endfunction
 
-function [ind v] = unbounded_direction(u, bind, j, m, n)
-    ind = -1;
+function [opt_cost v] = unbounded_direction(u, bind, j, m, n)
+    opt_cost = -Inf;
     v = zeros(n, 1);
     v(j) = 1;
     for i = 1:m
@@ -143,7 +143,7 @@ function phaseI(A, b, c, m, n)
     
 endfunction
 
-function [ind v] = simplex_helper(A,b,c,m,n,x,bind, Binv)
+function [opt_cost v bind Binv] = simplex_helper(A,b,c,m,n,x,bind, Binv)
     iteration = 0;
 
     while(true)
@@ -152,7 +152,7 @@ function [ind v] = simplex_helper(A,b,c,m,n,x,bind, Binv)
         [reduced_costs, non_basic_variables] = calculate_reduced_costs(A, c, n, bind, Binv);
 
         if (all(reduced_costs >= 0))   
-            [ind v] = optimal_solution(c, n, x, bind);     
+            [opt_cost v] = optimal_solution(c, n, x, bind);     
             return
         endif
 
@@ -164,7 +164,7 @@ function [ind v] = simplex_helper(A,b,c,m,n,x,bind, Binv)
         printf("\nTheta*\n%f\n", theta);
         
         if (theta == Inf)
-            [ind v] = unbounded_direction(u, bind, j, m, n);
+            [opt_cost v] = unbounded_direction(u, bind, j, m, n);
             return
         endif
 
