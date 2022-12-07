@@ -44,22 +44,28 @@ function [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux)
   bind(l) = j;
 endfunction
 
+function [A Binv Binv_A bind] = remove_redundant_constraint(l, A, Binv, bind)
+  A(l, :) = [];
+  Binv(l, :) = [];
+  Binv(:, l) = [];
+  bind(l) = [];
+  Binv_A = Binv * A;
+endfunction
+
 function [] = drive_artificials_out(A, x, bind, Binv, m_aux, n_aux)
   Binv_A = Binv * A;
-  for l = 1:m_aux
+  l = 1;
+  while l <= m_aux
     if is_artificial(bind(l), m_aux, n_aux)
       if all(Binv_A(l, :) == 0)
-        A(l, :) = [];
-        Binv(l, :) = [];
-        Binv(:, l) = [];
-        bind(l) = -1;
-        %% o que fazer com Binv_A????
+        [A Binv Binv_A bind] = remove_redundant_constraint(l, A, Binv, bind);
+        m_aux -= 1;
       else
         [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv);
+        l += 1;
       endif
     endif
-  endfor
-  bind(bind == -1) = []; % remove -1 elements from 
+  endwhile
 endfunction
 
 function [opt_cost v bind Binv] = phaseI(A, b, c, m, n)
