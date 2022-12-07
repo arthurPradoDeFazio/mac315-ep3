@@ -32,6 +32,53 @@ function [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux
   Binv_aux = eye(m_aux);
 endfunction
 
+function artificial = is_artificial(index, m_aux, n_aux)
+  artificial = (index >= n_aux - m_aux + 1);
+endfunction
+
+function [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux)
+  j = find(Binv_A(l) != 0)(1);
+  u = Binv_A(:, j);
+  Binv = update_Binv(Binv, m_aux, u, l);
+  Binv_A = update_Binv(Binv_A, m_aux, u, l);
+  bind(l) = j;
+endfunction
+
+function [] = drive_artificials_out(A, x, bind, Binv, m_aux, n_aux)
+  Binv_A = Binv * A;
+  for l = 1:m_aux
+    if is_artificial(bind(l), m_aux, n_aux)
+      if all(Binv_A(l, :) == 0)
+        A(l, :) = [];
+        Binv(l, :) = [];
+        Binv(:, l) = [];
+        bind(l) = -1;
+        %% o que fazer com Binv_A????
+      else
+        [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv);
+      endif
+    endif
+  endfor
+  bind(bind == -1) = []; % remove -1 elements from 
+endfunction
+
+function [opt_cost v bind Binv] = phaseI(A, b, c, m, n)
+    printf("Fase 1\n\n");
+
+    [A b] = force_positive_b(A, b, m);
+    [A_aux, b_aux, c_aux, m_aux, n_aux] = introduce_artificial_variables(A, b, c, m, n);
+    [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
+    
+    [opt_cost v bind Binv] = simplex_helper(A_aux, b_aux, c_aux, m_aux, n_aux, x_aux, bind_aux, Binv_aux);
+    
+    if opt_cost > 0
+      return
+    endif
+    
+    drive_artificials_out()
+    
+endfunction
+
 
 
 % ========================================================================================================================
@@ -132,19 +179,6 @@ function x = update_basic_solution(x, bind, m, u, theta, j, l)
 % Main function: 
 % ========================================================================================================================
 
-function [opt_cost v bind Binv] = phaseI(A, b, c, m, n)
-    printf("Fase 1\n\n");
-
-    [A b] = force_positive_b(A, b, m);
-    [A_aux, b_aux, c_aux, m_aux, n_aux] = introduce_artificial_variables(A, b, c, m, n);
-    [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
-    
-    [opt_cost v bind Binv] = simplex_helper(A_aux, b_aux, c_aux, m_aux, n_aux, x_aux, bind_aux, Binv_aux);
-    if opt_cost > 0
-      return
-    endif
-    
-endfunction
 
 function [opt_cost v bind Binv] = simplex_helper(A,b,c,m,n,x,bind, Binv)
     iteration = 0;
