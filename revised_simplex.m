@@ -38,6 +38,7 @@ endfunction
 
 function [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux)
   j = find(Binv_A(l, :) != 0)(1);
+  printf("\nA variável básica %d é artificial e será substituída pela variável de índice %d\n", bind(l), j);
   u = Binv_A(:, j);
   Binv = update_Binv(Binv, m_aux, u, l);
   Binv_A = update_Binv(Binv_A, m_aux, u, l);
@@ -45,6 +46,7 @@ function [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux)
 endfunction
 
 function [A b Binv Binv_A bind m_aux n_aux] = remove_redundant_constraint(l, A, Binv, bind, m_aux, n_aux)
+  printf("\nA restrićão %d é redundante e será removida\n");
   A(l, :) = [];
   b(l) = [];
   Binv(l, :) = [];
@@ -56,20 +58,36 @@ function [A b Binv Binv_A bind m_aux n_aux] = remove_redundant_constraint(l, A, 
 endfunction
 
 function [A b bind Binv] = drive_artificials_out(A, b, bind, Binv, m_aux, n_aux)
+  printf("\nRemocão das variáveis artificais\n\n");
+  printf("Índices básicos: ");
+  for i = 1:m_aux
+    printf("%d\t", bind(i));
+  endfor
+  
   Binv_A = Binv * A;
   l = 1;
   while l <= m_aux
     if is_artificial(bind(l), m_aux, n_aux)
+      printf("\nRemocão de %d\n", bind(l));
+      A
+      Binv
+      Binv_A
+      bind
       if all(Binv_A(l, :) == 0)
         [A Binv Binv_A bind m_aux n_aux] = remove_redundant_constraint(l, A, b, Binv, bind, m_aux, n_aux);
       else
         [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux);
         l += 1;
       endif
+      
     else
       l += 1;
     endif
   endwhile
+  A
+  Binv
+  Binv_A
+  bind
 endfunction
 
 function [opt_cost v bind Binv A b] = phaseI(A, b, c, m, n)
