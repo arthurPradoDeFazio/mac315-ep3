@@ -46,8 +46,7 @@ function [Binv Binv_A bind] = drive_artificial_out(l, Binv_A, bind, Binv, m_aux)
 endfunction
 
 function [A b Binv Binv_A bind m_aux n_aux] = remove_redundant_constraint(l, A, b, Binv, bind, m_aux, n_aux)
-  printf("\nA restrićão %d é redundante e será removida\n", l);
-  A(l, :)
+  printf("\nA restrição %d é redundante e será removida.\n", l);
   A(l, :) = [];
   b(l) = [];
   Binv(l, :) = [];
@@ -64,7 +63,6 @@ function [A b bind Binv] = drive_artificials_out(A, b, bind, Binv, m_aux, n_aux)
   for i = 1:m_aux
     printf("%d\t", bind(i));
   endfor
-  
   Binv_A = Binv * A;
   l = 1;
   while l <= m_aux
@@ -84,6 +82,7 @@ function [A b bind Binv] = drive_artificials_out(A, b, bind, Binv, m_aux, n_aux)
       l += 1;
     endif
   endwhile
+  printf("\n")
   A
   Binv
   Binv_A
@@ -204,7 +203,7 @@ function x = update_basic_solution(x, bind, m, u, theta, j, l)
  endfunction
 
 function [opt_cost v] = phaseII(A, b, c, x, bind, Binv, m, n)
-  printf("\nFase 2:\n");
+  printf("\nFase 2:\n\n");
   [opt_cost v bind Binv] = simplex_helper(A, b, c, m, n, x, bind, Binv);
 endfunction
 % ========================================================================================================================
@@ -283,10 +282,6 @@ endfunction
 % A = [ [1; 2; 2] [2; 1; 2] [2; 2; 1] [1; 0; 0] [0; 1; 0] [0; 0; 1] ];
 % m = 3;
 % n = 6;
-% x = [0, 0, 0, 20, 20, 20]';
-% bind = [4, 5, 6];
-% B = [ [1; 0; 0] [0; 1; 0] [0; 0; 1]];
-% Binv = inv(B);
 
 % Problem with unlimited cost:
 A = [ [1; 0] [2; 1] [0; 1] [1; 1] [0; 0] ];
@@ -295,14 +290,12 @@ c = [4  5  1 -1 -1]';
 m = 2;
 n = 5;
 
-
-
-% problem with optimal solution and redundant constraint
-%A = [[1; -1; 0; 0] [2; 2; 4; 0] [3; 6; 9; 3] [0;0;0; 1]] % pagina 114 do livro
-%b = [3 2 5 1]'
-%c = [1 1 1 0]'
-%m = 4
-%n = 4
+% Problem with optimal solution and redundant constraint
+A = [[1; -1; 0; 0] [2; 2; 4; 0] [3; 6; 9; 3] [0;0;0; 1]] % pagina 114 do livro
+b = [3 2 5 1]'
+c = [1 1 1 0]'
+m = 4
+n = 4
 
 % Infeasible problem
 %A = [[3; 8; 1; 12] [4; 7; 1; 12] [7; 90; 1; 98] [9; 1; 1; 11]]
@@ -312,5 +305,3 @@ n = 5;
 %n = 4
 
 simplex(A, b, c, m, n)
-
-
