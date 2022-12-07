@@ -132,17 +132,19 @@ function x = update_basic_solution(x, bind, m, u, theta, j, l)
 % Main function: 
 % ========================================================================================================================
 
-function phaseI(A, b, c, m, b):
+function phaseI(A, b, c, m, n)
     printf("Fase 1\n\n");
 
-    [A b] = force_positive_b(A, b, m)
+    [A b] = force_positive_b(A, b, m);
 
-    [A b c m n] = introduce_artificial_variables(A, b, c, m, n);
+    [A_aux, b_aux, c_aux, m_aux, n_aux] = introduce_artificial_variables(A, b, c, m, n);
+    [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
+    simplex_helper(A_aux, b_aux, c_aux, m_aux, n_aux, x_aux, bind_aux, Binv_aux);
+    
 endfunction
 
-function [ind v] = phaseII(A,b,c,m,n,x,bind, Binv)
+function [ind v] = simplex_helper(A,b,c,m,n,x,bind, Binv)
     iteration = 0;
-    printf("Fase 2\n\n");
 
     while(true)
         print_iteration_info(c, bind, x, iteration)
@@ -177,8 +179,8 @@ endfunction
 
 
 function [ind x d] = simplex(A, b, c, m, n)
-  [A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n);
-  [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
+  %phaseI
+  %phaseII
 endfunction
 
 % ========================================================================================================================
@@ -206,12 +208,11 @@ x = [10 0 3 0 0]';
 bind = [1 3];
 B = [ [1; 0] [0; 1] ];
 Binv = inv(B);
-<<<<<<< HEAD
+
 %[A_aux b_aux c_aux m_aux n_aux] = auxiliary_problem(A, b, c, m, n);
 %initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
-||||||| 74c2e83
-auxiliary_problem(A, b, c, m, n);
-=======
+
+
 introduce_artificial_variables(A, b, c, m, n);
->>>>>>> f2c7ba796b2707c9bf66ad1693a54fbb7213635d
+
 %[ind v] = phaseII(A,b,c,m,n,x,bind, Binv);
