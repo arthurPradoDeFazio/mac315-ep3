@@ -132,14 +132,17 @@ function x = update_basic_solution(x, bind, m, u, theta, j, l)
 % Main function: 
 % ========================================================================================================================
 
-function phaseI(A, b, c, m, n)
+function [opt_cost v bind Binv] = phaseI(A, b, c, m, n)
     printf("Fase 1\n\n");
 
     [A b] = force_positive_b(A, b, m);
-
     [A_aux, b_aux, c_aux, m_aux, n_aux] = introduce_artificial_variables(A, b, c, m, n);
     [x_aux bind_aux Binv_aux] = initial_solution_to_auxiliary_problem(A_aux, b_aux, c_aux, m_aux, n_aux);
-    simplex_helper(A_aux, b_aux, c_aux, m_aux, n_aux, x_aux, bind_aux, Binv_aux);
+    
+    [opt_cost v bind Binv] = simplex_helper(A_aux, b_aux, c_aux, m_aux, n_aux, x_aux, bind_aux, Binv_aux);
+    if opt_cost > 0
+      return
+    endif
     
 endfunction
 
@@ -177,9 +180,23 @@ function [opt_cost v bind Binv] = simplex_helper(A,b,c,m,n,x,bind, Binv)
     endwhile
 endfunction
 
+function [ind x d] = infeasible_problem(opt_cost)
+  printf("\nO problema auxiliar tem custo ótimo estritamente positivo e igual a %f\n", opt_cost);
+  printf("\nO problema original é inviável\n");
+  ind = 1;
+  x = NaN;
+  d = NaN;
+endfunction
+
 
 function [ind x d] = simplex(A, b, c, m, n)
-  %phaseI
+  [opt_cost v bind Binv] = phaseI(A, b, c, m, n);
+  
+  if opt_cost > 0
+    [ind x d] = infeasible_problem(opt_cost);
+    return
+  endif
+  
   %phaseII
 endfunction
 
