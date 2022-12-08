@@ -90,7 +90,7 @@ function [A b bind Binv] = drive_artificials_out(A, b, bind, Binv, m_aux, n_aux)
 endfunction
 
 function [opt_cost v bind Binv A b] = phaseI(A, b, c, m, n)
-    printf("Fase 1\n\n");
+    printf("\nFase 1\n\n");
 
     [A b] = force_positive_b(A, b, m);
     [A_aux, b_aux, c_aux, m_aux, n_aux] = introduce_artificial_variables(A, b, c, m, n);
@@ -291,17 +291,17 @@ endfunction
 % n = 5;
 
 % Problem with optimal solution and redundant constraint
-A = [[1; -1; 0; 0] [2; 2; 4; 0] [3; 6; 9; 3] [0;0;0; 1]] % pagina 114 do livro
+A = [[1; -1; 0; 0] [2; 2; 4; 0] [3; 6; 9; 3] [0; 0; 0; 1]] % pagina 114 do livro
 b = [3 2 5 1]'
 c = [1 1 1 0]'
 m = 4
 n = 4
 
 % Infeasible problem
-%A = [[3; 8; 1; 12] [4; 7; 1; 12] [7; 90; 1; 98] [9; 1; 1; 11]]
-%b = [5 2 10 16]' 
-%c = [0 0 0 0]'
-%m = 4
-%n = 4
+% A = [[3; 8; 1; 12] [4; 7; 1; 12] [7; 90; 1; 98] [9; 1; 1; 11]]
+% b = [5 2 10 16]' 
+% c = [1 0 0 0]'
+% m = 4
+% n = 4
 
 simplex(A, b, c, m, n)
